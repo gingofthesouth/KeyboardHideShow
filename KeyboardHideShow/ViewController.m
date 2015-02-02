@@ -36,8 +36,6 @@
 
 -(BOOL)textFieldShouldReturn:(UITextField*)textField;
 {
-    // Submit the chat input
-    [self submit];
     [textField resignFirstResponder];
     
     return NO; // We do not want UITextField to insert line-breaks.
@@ -70,6 +68,10 @@
     [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | curve animations:^{
         self.view.frame = CGRectMake(0, 0, keyboardFrameEnd.size.width, keyboardFrameEnd.origin.y);
     } completion:nil];
+    
+    // Scroll to the bottom of the table view
+    NSIndexPath* ipath = [NSIndexPath indexPathForRow: [tableItemArray count] -1 inSection:0];
+    [chatTableView scrollToRowAtIndexPath: ipath atScrollPosition: UITableViewScrollPositionTop animated: YES];
 }
 
 - (void)keyboardWillBeHidden:(NSNotification *)note {
@@ -113,14 +115,21 @@
     // Get the current input
     NSString *chatLine = input.text;
     
+    // If the input textField is empty, we can just return
+    if ([chatLine isEqualToString:@""]) return;
+    
     // Add it to the table array
     [tableItemArray addObject:chatLine];
     
     // Reload the table contents
     [chatTableView reloadData];
     
+    // Clear the input field
+    input.text = @"";
+    
     // Scroll to the bottom
     NSIndexPath* ipath = [NSIndexPath indexPathForRow: [tableItemArray count] -1 inSection:0];
     [chatTableView scrollToRowAtIndexPath: ipath atScrollPosition: UITableViewScrollPositionTop animated: YES];
 }
+
 @end
